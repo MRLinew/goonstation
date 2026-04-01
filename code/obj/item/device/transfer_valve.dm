@@ -25,6 +25,7 @@ TYPEINFO(/obj/item/device/transfer_valve)
 	var/image/tank_two_image_under = null
 	///if true, allows adding cable to wear on back. TODO: refactor this out
 	var/allow_wearable = TRUE
+	is_bomb = TRUE //needs getpower proc
 
 	w_class = W_CLASS_GIGANTIC /// HEH
 	p_class = 3 /// H E H
@@ -433,6 +434,60 @@ TYPEINFO(/obj/item/device/transfer_valve)
 		c_state()
 			return
 
+	getbombpower() //not fun
+
+		if (!tank_one || !tank_two)
+			return 0
+		if (!tank_one.air_contents || !tank_two.air_contents)
+			return 0
+
+		//fake it
+		var/datum/gas_mixture/g1 = new
+		var/datum/gas_mixture/g2 = new
+
+		g1.volume = src.tank_one.air_contents.volume
+		g2.volume = src.tank_two.air_contents.volume
+
+		g1.merge(src.tank_one.air_contents)
+		g2.merge(src.tank_two.air_contents)
+		var/datum/gas_mixture/temp = g1.remove_ratio(1)
+
+		g2.volume = g1.volume
+		g2.merge(temp)
+		var/transfer_ratio = g1.volume / (g1.volume + g2.volume)
+		temp = g2.remove_ratio(transfer_ratio)
+		g1.merge(temp)
+		g1.react()
+		g1.react()
+		g1.react()
+		g1.react()
+		g1.react()
+		g1.react()
+		g1.react(mult=0.5)
+		g2.react()
+		g2.react()
+		g2.react()
+		g2.react()
+		g2.react()
+		g2.react()
+		g2.react(mult=0.5)
+
+		var/p1 = MIXTURE_PRESSURE(g1)
+		var/p2 = MIXTURE_PRESSURE(g2)
+		var/pressure = max(p1, p2)
+
+
+		var/volume_scale = (g1.volume / 70) ** (1/4)
+		boutput(usr, "volume scale: [volume_scale]")
+		var/range = (pressure - TANK_FRAGMENT_PRESSURE) * volume_scale / TANK_FRAGMENT_SCALE
+		boutput(usr, "rangepreclamp: [range]")
+
+		range = clamp(range, 0, 12)
+		qdel(g1)
+		qdel(g2)
+		if (temp)
+			qdel(temp)
+		return range
 //Prox sensor handling.
 
 	Move()

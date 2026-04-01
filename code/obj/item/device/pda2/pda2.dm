@@ -723,13 +723,25 @@
 
 	else if (istype(C, /obj/item/uplink_telecrystal/trick))
 		if (src.uplink && src.uplink.active)
-			boutput(user, SPAN_ALERT("The [C] explodes!"))
-			var/turf/T = get_turf(C.loc)
-			if(T)
-				T.hotspot_expose(700,125)
-				explosion(C, T, -1, -1, 2, 3) //about equal to a PDA bomb
+			var/obj/item/uplink_telecrystal/trick/B = C
+			var/p = B.power
+			boutput(user, SPAN_ALERT("The [B] explodes!"))
+			var/turf/T = get_turf(B.loc)
+			if (!T)
+				return
+				//fixing ghost coin crash
+			if (ismob(B.loc))
+				var/mob/M = B.loc
+				M.u_equip(B)
+				if (hascall(M, "update_inhands"))
+					M.update_inhands()
+
 			C.set_loc(user.loc)
-			qdel(C)
+			T.hotspot_expose(700,125)
+			explosion(C, T, p * 0.9, p * 0.18, p * 0.4, p * 0.7, flash_radiation_multiplier=0.1)
+			SPAWN(0)
+				if (B)
+					qdel(B)
 
 	else if (istype(C, /obj/item/uplink_telecrystal))
 		if (src.uplink && src.uplink.active)

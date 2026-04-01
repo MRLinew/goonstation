@@ -5,7 +5,7 @@
 	icon_state = "telecrystal_pure"
 	max_stack = INFINITY
 	var/icon_stack_value = 0 //! Used for updating the icon_state as stack amount changes
-
+	var/power = 1 //default 1, scale in bombs for more explodey in the end.
 	New()
 		..()
 		_update_stack_appearance()
@@ -17,6 +17,47 @@
 				user.put_in_hand(src)
 			boutput(user, SPAN_NOTICE("You add the [src] to the stack. It now has [src.amount] [src]."))
 			return
+		else if(W.is_bomb)
+			if(user?.traitHolder?.hasTrait("training_security")) //only security gets to rig bombs
+				var/obj/item/uplink_telecrystal/trick/T
+				if (W.getbombpower() <= 0)
+					return
+				if (!istype(src, /obj/item/uplink_telecrystal/trick))
+					T = new /obj/item/uplink_telecrystal/trick(get_turf(user))
+					T.power = W.getbombpower()
+					user.put_in_hand_or_drop(T)
+					qdel(W)
+				else
+					T = src
+					T.power = W.getbombpower() + src.power
+				user.put_in_hand_or_drop(T)
+				T.add_fingerprint(user)
+				boutput(user, SPAN_NOTICE("You rig the Telecrystal with the [W.name]"))
+				return
+			else if(user?.traitHolder?.hasTrait("training_engineer")) //engineering can jerryrig too lol. With glue
+				var/obj/item/uplink_telecrystal/trick/T
+				if (W.getbombpower() <= 0)
+					return
+				if (!istype(src, /obj/item/uplink_telecrystal/trick))
+					T = new /obj/item/uplink_telecrystal/trick(get_turf(user))
+					T.power = W.getbombpower()
+					user.put_in_hand_or_drop(T)
+					qdel(src)
+				else
+					T = src
+					T.power = W.getbombpower() + src.power
+				W.AddComponent(/datum/component/glued, T)
+				W.vis_flags &= ~(VIS_INHERIT_LAYER | VIS_INHERIT_PLANE)
+				W.plane = T.plane
+				W.layer = OBJ_LAYER - 0.1
+				W.remove_filter("glued_outline")
+				W.pixel_x = rand(-7, 7)
+				W.pixel_y = rand(-7, -1)
+				user.put_in_hand_or_drop(T)
+				T.add_fingerprint(user)
+				boutput(user, SPAN_NOTICE("You rig the Telecrystal with the [W.name]"))
+				return
+//T._AddComponent(/datum/component/glued,W)
 		else ..()
 
 	attack_hand(mob/user)

@@ -43,6 +43,7 @@ ADMIN_INTERACT_PROCS(/obj/item/old_grenade, proc/detonate)
 	///damage when loaded into a 40mm convesion chamber
 	var/launcher_damage = 25
 	var/detonating = FALSE
+	is_bomb =  TRUE
 	HELP_MESSAGE_OVERRIDE({"You can use a <b>screwdriver</b> to adjust the detonation time."})
 
 	New()
@@ -57,6 +58,11 @@ ADMIN_INTERACT_PROCS(/obj/item/old_grenade, proc/detonate)
 		UnregisterSignal(src, COMSIG_ITEM_ASSEMBLY_APPLY)
 		..()
 
+	getbombpower()
+		return 0.5
+
+
+
 	/// ----------- Trigger/Applier/Target-Assembly-Related Procs -----------
 
 	proc/assembly_setup(var/manipulated_grenade, var/obj/item/assembly/parent_assembly, var/mob/user, var/is_build_in)
@@ -69,6 +75,8 @@ ADMIN_INTERACT_PROCS(/obj/item/old_grenade, proc/detonate)
 		parent_assembly.qdel_on_tear_apart = TRUE
 		parent_assembly.expended = TRUE
 		src.detonate()
+
+
 
 	/// ----------------------------------------------
 
@@ -2451,3 +2459,4 @@ ADMIN_INTERACT_PROCS(/obj/item/gimmickbomb, proc/arm, proc/detonate)
 	if (istype(hero))
 		src.visible_message(SPAN_COMBAT("<B>[hero] dives onto [src], covering it with [his_or_her(hero)] body!</B>"))
 	return hero
+

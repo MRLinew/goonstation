@@ -244,13 +244,29 @@
 		if(src.locked)
 			return
 		if (istype(W, /obj/item/uplink_telecrystal/trick))
-			boutput(user, SPAN_ALERT("The [W] explodes!"))
-			var/turf/T = get_turf(W.loc)
-			if(T)
-				T.hotspot_expose(700,125)
-				explosion(W, T, -1, -1, 2, 3) //about equal to a PDA bomb
-			W.set_loc(user.loc)
-			qdel(W)
+			var/obj/item/uplink_telecrystal/trick/B = W
+			var/p = B.power
+			var/turf/T = get_turf(src)
+			if (!T)
+				return
+
+			boutput(user, SPAN_ALERT("The [B] explodes!"))
+
+			// Force-remove from whoever is holding it. Fixes annoying crash.
+			if (ismob(B.loc))
+				var/mob/M = B.loc
+				M.u_equip(B)
+				if (hascall(M, "update_inhands"))
+					M.update_inhands()
+
+			B.set_loc(T)
+			T.hotspot_expose(700, 125)
+			explosion(B, T, p * 0.9, p * 0.18, p * 0.4, p * 0.7, flash_radiation_multiplier=0.1)
+
+			SPAWN(0)
+				if (B)
+					qdel(B)
+			return
 		else if (istype(W, /obj/item/uplink_telecrystal))
 			var/crystal_amount = W.amount
 			uses = uses + crystal_amount

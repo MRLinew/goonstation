@@ -150,6 +150,8 @@ ABSTRACT_TYPE(/obj/item)
 
 	var/list/tooltip_options = list()
 
+	var/is_bomb = FALSE
+
 	/// This is the safe way of changing 2-handed-ness at runtime. Use this please.
 	proc/setTwoHanded(var/twohanded = 1)
 		if(ismob(src.loc))
@@ -1888,3 +1890,6 @@ ADMIN_INTERACT_PROCS(/obj/item, proc/admin_set_stack_amount)
 	if(key != "material")
 		return
 	src.worn_material_texture_image = src.getTexturedWornImage(texture, blendMode)
+
+/obj/proc/getbombpower()
+	return 0 //this should never get called but just in case.
