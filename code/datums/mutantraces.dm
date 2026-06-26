@@ -609,7 +609,7 @@ ABSTRACT_TYPE(/datum/mutantrace)
 			if("reset") // Make everything mutant back into stock-ass human
 				if(!src.mutant_organs.len)
 					return // All done!
-				if (OHM.tail && OHM.tail in O) // mutant to human, drop the tail. Unless you're a changer, then your butt just eats it
+				if (OHM.tail && (OHM.tail in O)) // mutant to human, drop the tail. Unless you're a changer, then your butt just eats it
 					qdel(OHM.tail)
 				else
 					for(var/mutorgan in src.mutant_organs)
